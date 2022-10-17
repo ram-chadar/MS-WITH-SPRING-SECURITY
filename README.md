@@ -10,23 +10,17 @@ This project is a simple skeleton code for microservice architecture pattern usi
 
 ## Services
 
-By now, the functional services are still decomposed into three core services. Each of them can be tested, built, and deployed independently.
+By now, the functional services are still decomposed into two core services. Each of them can be tested, built, and deployed independently.
 
 ![Infrastructure plan](http://res.cloudinary.com/imrenagi-com/image/upload/v1494871114/Untitled_cwhlwy.png)
 
 
-### Auth service
-Provides several API for user authentication and authorization with OAuth 2.0.
-
-| Method | Path              | Description                                   | Scope |
-|--------|-------------------|-----------------------------------------------|-------|
-| POST   | /uaa/oauth/token  | Get new access token and refresh access token | ui    |
-| POST   | /uaa/oauth/logout | Logout to revoke access token                 | ui    |
 
 
-### Account service
-Contains API related to creating and retrieving all user information. In this service, we are also demonstrating how we use 
-user's privilege in accessing the API. For example, the access to `GET ` `/accounts` endpoint will only be allowed for user whose `READ_BASIC_INFORMATION` privilege, but the access
+
+### PRODUCT SERVICE
+Contains API related to creating and retrieving all product information. In this service, we are also demonstrating how we use 
+user's privilege in accessing the API. For example, the access to `GET ` `/products` endpoint will only be allowed for user whose `READ_BASIC_INFORMATION` privilege, but the access
  to other endpoints don't require any special privilege as long as it has correct scope. Please refer to spring security docs [here](http://projects.spring.io/spring-security-oauth/docs/oauth2.html) for more details.
 
 | Method | Path              | Description                                   | Scope |  Privilege |
