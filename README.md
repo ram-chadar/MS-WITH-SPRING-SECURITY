@@ -22,11 +22,11 @@ Contains API related to creating and retrieving all product information. In this
 user's privilege in accessing the API. For example, the access to `GET ` `/products` endpoint will only be allowed for user whose `READ_BASIC_INFORMATION` privilege, but the access
  to other endpoints don't require any special privilege as long as it has correct scope. Please refer to spring security docs [here](http://projects.spring.io/spring-security-oauth/docs/oauth2.html) for more details.
 
-| Method | Path              | Description                                   | Scope |  Privilege |
-|--------|-------------------|-----------------------------------------------|-------|------------|
-| POST   | /accounts  | Create new account | ui    | ALL_ACCESS |
-| GET    | /accounts | Get All user informations                | ui    | READ_BASIC_INFORMATION |
-| GET    | /accounts/{username} | Get account with username | server | ALL_ACCESS |
+| Method | Path                   | Description                 | Scope |  Privilege |
+|--------|------------------------|-----------------------------|-------|------------|
+| POST   | /product/getAllProduct | To get all products | ui    | ALL_ACCESS |
+| GET    | /product/saveProduct   | To save product     | ui    | READ_BASIC_INFORMATION |
+| GET    | /product/getProductById/{id} | Get particular product | server | ALL_ACCESS |
 | GET    | /accounts/current  | Get current account data | ui | ALL_ACCESS |
 
 ### Notification service
