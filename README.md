@@ -3,9 +3,8 @@
 # Microservice Skeleton Designed By Ram C.
 
 
-This project is a simple skeleton code for microservice architecture pattern using Spring Cloud, Spring Boot, and Docker.
- Thanks to [Piggy Metrics](https://github.com/sqshq/PiggyMetrics) which has inspired and given really good knowledge for setting up
- this project.
+This project is a simple skeleton code for microservice architecture pattern using Spring Cloud, Spring Boot, Spring Security.
+
 
 ## Services
 
@@ -14,43 +13,58 @@ By now, the functional services are still decomposed into two core services. Eac
 ![Infrastructure plan](http://res.cloudinary.com/imrenagi-com/image/upload/v1494871114/Untitled_cwhlwy.png)
 
 
-
-
-
 ### PRODUCT SERVICE
 Contains API related to creating and retrieving all product information. In this service, we are also demonstrating how we use 
-user's privilege in accessing the API. For example, the access to `GET ` `/products` endpoint will only be allowed for user whose `READ_BASIC_INFORMATION` privilege, but the access
+user's privilege in accessing the API. For example, the access to `GET ` `/products` endpoint will only be allowed for user whose `READ_BASIC_INFORMATION` privilege, but the access  
  to other endpoints don't require any special privilege as long as it has correct scope. Please refer to spring security docs [here](http://projects.spring.io/spring-security-oauth/docs/oauth2.html) for more details.
 
-| Method | Path                   | Description                 | Scope |  Privilege |
-|--------|------------------------|-----------------------------|-------|------------|
-| POST   | /product/getAllProduct | To get all products | ui    | ALL_ACCESS |
-| GET    | /product/saveProduct   | To save product     | ui    | READ_BASIC_INFORMATION |
-| GET    | /product/getProductById/{id} | Get particular product | server | ALL_ACCESS |
-| GET    | /accounts/current  | Get current account data | ui | ALL_ACCESS |
+| Method    | Path                             | Description                    | Scope |  Privilege |
+|-----------|----------------------------------|--------------------------------|-------|------------|
+| GET       | /product/getAllProduct           | To get all products            | ui    | ALL_ACCESS |
+| POST      | /product/saveProduct             | To save product                | ui    | ALL_ACCESS |
+| GET       | /product/getProductById/{id}     | To Get particular product      | ui    | ALL_ACCESS |
+| PUT       | /product/updateProduct           | To update product              | ui    | ALL_ACCESS |
+| DELETE    | /product/deleteProduct/{id}      | To delete product bt id        | ui    | ALL_ACCESS |
+| GET       | /product/getProductByName/pencile| To get product  by name        | ui    | ALL_ACCESS |
+| POST      | /product/uploadSheet             | To upload product from excel   | ui    | ALL_ACCESS |
+| GET       | /product/getProductByName/pencile| To export product from DB      | ui    | ALL_ACCESS |
 
-### Notification service
-[WIP aka Work In Progress]
+and many more....
 
-#### Notes
+
+### SUPPLIER SERVICE
+
+| Method    | Path                             | Description                    | Scope |  Privilege |
+|-----------|----------------------------------|--------------------------------|-------|------------|
+| POST      | /supplier/saveSupplier           | To save supplier             | ui    | ALL_ACCESS |
+| GET       | /supplier/getSupplierById/1001   | To Get particular product    | ui    | ALL_ACCESS |
+
+
+### Notes
 * Each microservice has it's own database and there is no way to access the database directly from other services.
 * The services in this project are using MySQL for the persistent storage. In other case, it is also possible for one service 
 to use any type of database (SQL or NoSQL).
 * Service-to-service communiation is done by using REST API. It is pretty convenient to use HTTP call in Spring
-since it provides a simplify HTTP layer service called Feign (discussed later). For the next iteration, I'm also planningto use
+since it provides a simplify HTTP layer service called RestTemplate (discussed later). For the next iteration, I'm also planning to use
  asyncronous message transfer using Apache Kafka since Kafka will allow us to send message to several service easily.
 
-## Infrastructure
+### Infrastructure
 Spring Cloud is a really good web framework that we can use for building a microservice infrastructure since it provides 
 broad supporting tools such as Load Balancer, Service registry, Monitoring, and Configuration.
 
 ![This image is taken from PiggyMetrics](https://cloud.githubusercontent.com/assets/6069066/13906840/365c0d94-eefa-11e5-90ad-9d74804ca412.png)
 Image source: [PiggyMetrics](https://github.com/sqshq/PiggyMetrics)
 
+### Eureka Server
+Eureka Server is an application that holds the information about all client-service applications. Every Micro service will register into the Eureka server and Eureka server knows all the client applications running on each port and IP address. Eureka Server is also known as Discovery Server.
+
+![image](https://user-images.githubusercontent.com/61204888/196253639-c291ff9c-58d6-49f2-a25f-8fd84a83cd64.png)
+
+
 ### Config *
 [Spring Cloud Config](http://cloud.spring.io/spring-cloud-config/spring-cloud-config.html) is horizontally scalable centralized configuration service for distributed systems. It uses a pluggable repository layer that currently supports local storage, Git, and Subversion. 
 
-For the purpose of proof-of-concept, we just use spring `native profile`, which simply loads config file from local classpath. You can see that we have `shared` diretory in [Config service resource](https://github.com/imrenagi/microservice-skeleton/tree/master/config/src/main/resources). When a service (e.g. Account-service) wants to request it's configuration, the config service will response with `shared/service-account.yml` and `shared/application.yml` (which is shared among all services).
+For the purpose of proof-of-concept, we just use spring `native profile`, which simply loads config file from github repository. You can see that we have `shared` repo [in [Config service resource](Config File)](https://github.com/ram-chadar/ms-config/blob/main/application.yml). When a service (e.g. product-service) wants to request it's configuration, the config service will response with `application.yml` (which is shared among all services).
     
 ##### Client side usage
 Just build Spring Boot application with `spring-cloud-starter-config` dependency, autoconfiguration will do the rest.
@@ -58,49 +72,12 @@ Just build Spring Boot application with `spring-cloud-starter-config` dependency
 Now you don't need any embedded properties in your application. Just provide `bootstrap.yml` with application name and Config service url:
 ```yml
 spring:
-  application:
-    name: notification-service
   cloud:
     config:
-      uri: http://config:8888
-      fail-fast: true
+      enabled: true
+      uri: http://localhost:9190
 ```
 
-### Auth Service
-
-Authorization responsibilities are completely extracted to separate server, which grants [OAuth2 tokens](https://tools.ietf.org/html/rfc6749) for the backend resource services. Auth Server is used for user authorization as well as for secure machine-to-machine communication inside a perimeter.
-
-This project only uses two type of authorizations, they are [`Password credentials`](https://tools.ietf.org/html/rfc6749#section-4.3) grant type for users authorization and [`Client Credentials`](https://tools.ietf.org/html/rfc6749#section-4.4) grant for microservices authorization.
-
-There are two ways of storing the authorization token granted for users. First, we can us in memory database provided by Spring security oauth2 library. Second, we can use persistent storage such as (MySQL, MongoDB, PostgresSQL, etc) to keep access tokens, refresh tokens and client credentials. In this project, I'm using MySQL database to keep all authorization information along with the database schema that will be executed by flyway. To change the implementation into in-memory database, simply:
-* Comment `@Configuration`, `@EnableAuthorizationServer` and `@EnableWebSecurity` in `JdbcOAuth2Config.java` and `JdbcServerSecurityConfig.java`.
-* Comment out `@Configuration`, `@EnableAuthorizationServer` and `@EnableWebSecurity` in `InMemoryOAuth2Config.java` and `InMemoryWebSecurityConfig.java`
-* Build the program.
-
-Spring Cloud Security provides convenient annotations and autoconfiguration to make this really easy to implement from both server and client side. You can learn more about it in [documentation](http://cloud.spring.io/spring-cloud-security/spring-cloud-security.html) and check configuration details in Auth Server code.
-
-From the client side, everything works exactly the same as with traditional session-based authorization. You can retrieve `Principal` object from request, check user's roles and other stuff with expression-based access control and `@PreAuthorize` annotation.
-
-Each client in this application (service-account, service-auth, and service-notification) has a scope: `server` for backend services, and `ui` - for the browser. So we can also protect controllers from external access, for example:
-
-``` java
-@PreAuthorize("#oauth2.hasScope('server')")
-    @RequestMapping(method = RequestMethod.POST)
-    public void createUser(@Valid @RequestBody User user) {
-        userService.create(user);
-    }
-```
-
-In addition, I also use role and privilege authorization for several endpoints in this project to protect the controller from unauthorized access. To add specific authorization checking, we can use `hasAuthority()` or `hasRole()` as the parameter of the `@PreAuthorize` annotation. For example:
-``` java
-    @PreAuthorize("hasAuthority('READ_BASIC_INFORMATION')")
-    @RequestMapping(path = "/", method = RequestMethod.GET)
-    public ResponseEntity<AccountResponse> getAllAccounts() {
-        AccountResponse response = new AccountResponse();
-        response.accounts = accountService.findAll();
-        return new ResponseEntity<>(response, HttpStatus.OK);
-    }
-```
 
 ### Database
 
@@ -119,6 +96,9 @@ Using flyway in this project is really simple because we don't have to explicitl
  
 ### API Gateway *
 
+![image](https://user-images.githubusercontent.com/61204888/196254879-2869294c-b6ac-40db-829f-86d93875ca36.png)
+
+
 As you can see, there are three core services, which expose external API to client. In a real-world systems, this number can grow very quickly as well as whole system complexity. Actualy, hundreds of services might be involved in rendering one complex webpage. 
 
 In theory, a client could make requests to each of the microservices directly. But obviously, there are challenges and limitations with this option, like necessity to know all endpoints addresses, perform http request for each peace of information separately, merge the result on a client side. Another problem is non web-friendly protocols, which might be used on the backend.
@@ -129,23 +109,30 @@ Netflix opensourced [such an edge service](http://techblog.netflix.com/2013/06/a
 
 ```yml
 
-zuul:
-  routes:
-    service-auth:
-      path: /uaa/**
-      url: http://service-auth:5000
-      stripPrefix: false
-      sensitiveHeaders:
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      routes:
+      - id: PRODUCT-SERVICE
+        uri: lb://PRODUCT-SERVICE
+        predicates:
+          - Path=/product/**
+         
+      - id: SUPPLIER-SERVICE
+        uri: lb://SUPPLIER-SERVICE
+        predicates:
+          - Path=/supplier/**
+      
+ 
 
-    service-account:
-      path: /accounts/**
-      serviceId: service-account
-      stripPrefix: false
-      sensitiveHeaders:
+server:
+  port: 9191 
 
 ```
 
-That means all requests starting with `/uaa` will be routed to Authentication service and `/accounts` will be forwarded to account service. There is no hardcoded address, as you can see. Zuul uses Service discovery  mechanism to locate Notification service instances and also Circuit Breaker and Load Balancer, described below.
+That means all requests starting with `/product` will be routed to PRODUCT-SERVICE and `/supplier` will be forwarded to SUPPLIER-SERVICE. There is no hardcoded address, as you can see. API gateway uses Service discovery mechanism to locate PRODUCT-SERVICE instances and also SUPPLIER-SERVICE.
 
 ### Service Discovery *
 Another commonly known architecture pattern is Service discovery. It allows automatic detection of network locations for service instances, which could have dynamically assigned addresses because of auto-scaling, failures and upgrades.
@@ -158,12 +145,31 @@ Client support enabled with `@EnableDiscoveryClient` annotation an `bootstrap.ym
 ``` yml
 spring:
   application:
-    name: servuce-account
+    name: XXXXX-XXXXX
 ```
 
 Now, on application startup, it will register with Eureka Server and provide meta-data, such as host and port, health indicator URL, home page etc. Eureka receives heartbeat messages from each instance belonging to a service. If the heartbeat fails over a configurable timetable, the instance will be removed from the registry.
 
 Also, Eureka provides a simple interface, where you can track running services and number of available instances: `http://localhost:8761`
+
+## How to run all things
+
+<ul>
+First run eureka server >> port 8761
+Second run  Config Server >> port 9190
+Third run API gateway >> port  9191
+Fourth run Product service  >> port 8080
+Fifth run Supplier service  >> port 8081 
+ 
+</ul>
+
+
+### Important Endpoint *
+* [http://localhost:9191](http://localhost:80) - Gateway
+* [http://localhost:8761](http://localhost:8761) - Eureka Dashboard
+
+
+### Below points not a part of our projects its just for knokledge perpose
 
 ### Load balancer, Circuit Breaker and Http Client *
 
@@ -215,43 +221,6 @@ Let's see our system behavior under load: A service calls another service and it
 
 
 
-## Infrastructure Automation
-[WIP]
-
-## How to run all things
-
-### Before you start
-* Install docker and docker compose
-* Export environment variables: `SW_CONFIG_SERVICE_PASSWORD`, `MSW_ROOT_PASSWORD`,  `MSW_DB_USER`, `MSW_DB_PASSWORD`, `MSW_SERVICE_ACCOUNT_PASSOWRD`, `MSW_DB_TEST_PASSWORD`.
-
-### Production
-In production mode, all images will be pulled from docker hub. 
-```bash
-docker-compose up -d
-```
-
-### Development 
-For development mode, all source code will be compiled and packaged as a jar. These jar files will be used later for 
-creating the image for every service. To build, use this command:
-```$xslt
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
-```
-
-### Important Endpoint *
-* [http://localhost:80](http://localhost:80) - Gateway
-* [http://localhost:8761](http://localhost:8761) - Eureka Dashboard
-* [http://localhost:9000/hystrix](http://localhost:9000/hystrix) - Hystrix Dashboard (paste Turbine stream link on the form)
-* [http://localhost:8989](http://localhost:8989) - Turbine stream (source for the Hystrix Dashboard)
-* [http://localhost:15672](http://localhost:15672) - RabbitMq management (default login/password: guest/guest)
-
-### Kubernetes Deployment
-[TBD]
-
-## Contributing
-[TBD]
-
-
-*_This part is taken from [PiggyMetrics](https://github.com/sqshq/PiggyMetrics) with some adjustment because there is no significant differences in the way I use it_
 
 
 
