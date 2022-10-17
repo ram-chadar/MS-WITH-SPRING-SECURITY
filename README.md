@@ -95,8 +95,7 @@ flyway:
 Using flyway in this project is really simple because we don't have to explicitly run migration command. Spring will handle this process for us.
  
 ### API Gateway *
-
-[![image](https://drive.google.com/drive/u/0/folders/1ALc-0v8MOo1SjOoofKKfWUfI1vdLjnX5)]
+![image](https://user-images.githubusercontent.com/61204888/196265377-67c3256c-e9b8-4590-aab7-8716de1eb4a4.png)
 
 
 As you can see, there are three core services, which expose external API to client. In a real-world systems, this number can grow very quickly as well as whole system complexity. Actualy, hundreds of services might be involved in rendering one complex webpage. 
