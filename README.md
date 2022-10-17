@@ -96,7 +96,7 @@ Using flyway in this project is really simple because we don't have to explicitl
  
 ### API Gateway *
 
-[![image](https://user-images.githubusercontent.com/61204888/196254879-2869294c-b6ac-40db-829f-86d93875ca36.png)](https://drive.google.com/drive/u/0/folders/1ALc-0v8MOo1SjOoofKKfWUfI1vdLjnX5)
+[![image](https://drive.google.com/drive/u/0/folders/1ALc-0v8MOo1SjOoofKKfWUfI1vdLjnX5)]
 
 
 As you can see, there are three core services, which expose external API to client. In a real-world systems, this number can grow very quickly as well as whole system complexity. Actualy, hundreds of services might be involved in rendering one complex webpage. 
