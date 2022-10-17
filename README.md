@@ -53,7 +53,7 @@ Spring Cloud is a really good web framework that we can use for building a micro
 broad supporting tools such as Load Balancer, Service registry, Monitoring, and Configuration.
 
 ![This image is taken from PiggyMetrics](https://cloud.githubusercontent.com/assets/6069066/13906840/365c0d94-eefa-11e5-90ad-9d74804ca412.png)
-Image source: [PiggyMetrics](https://github.com/sqshq/PiggyMetrics)
+
 
 ### Eureka Server
 Eureka Server is an application that holds the information about all client-service applications. Every Micro service will register into the Eureka server and Eureka server knows all the client applications running on each port and IP address. Eureka Server is also known as Discovery Server.
